@@ -58,6 +58,9 @@ class ViewController: NSViewController {
                 let pb = monitor.pasteboard
                 pb.clearContents()
                 pb.setString(sender.title, forType: .string)
+                
+                // set as new copy
+                setupNewMenu(with: sender.title)
             }
             
             monitor.resetCount()
@@ -69,14 +72,19 @@ class ViewController: NSViewController {
 
 }
 extension ViewController: PasteboardMonitorDelegate {
+    
+    private func setupNewMenu(with title: String) {
+        if self.menus.count >= maxCacheCount {
+            self.menus.removeFirst()
+        }
+        self.menus.append(newMenuItem(title: title, action: #selector(self.menuItemClicked)))
+    }
+    
     func pasteboardChangeDetected(monitor: PasteboardMonitor, item: NSPasteboardItem) {
         print(item)
         print(monitor.lastChangeCount)
         if monitor.pasteboard == NSPasteboard.general, let str = item.plainText() {
-            if self.menus.count >= maxCacheCount {
-                self.menus.removeFirst()
-            }
-            self.menus.append(newMenuItem(title: str, action: #selector(self.menuItemClicked)))
+            setupNewMenu(with: str)
         }
     }
     
